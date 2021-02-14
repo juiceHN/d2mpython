@@ -12,6 +12,15 @@ import datetime
 
 data = pd.read_csv('sales.csv')
 
+def values_on_bars(chart):
+    for p in chart.patches:
+        chart.annotate(format(p.get_height(), '.2f'), 
+                       (p.get_x() + p.get_width() / 2., 
+                       p.get_height()), 
+                       ha = 'center', 
+                       va = 'center',
+                       xytext = (0, 10), 
+                       textcoords = 'offset points')
 # print(data.head())
 
 ############
@@ -25,7 +34,7 @@ new_names = []
 for col in col_names:
     new_names.append(col.replace(" ", "_"))
 data.columns = new_names
-data.info()
+#data.info()
 data['Order_Date']=pd.to_datetime(data['Order_Date'])
 
 # print(data.Sales.mean())
@@ -37,7 +46,7 @@ data['Order_Date']=pd.to_datetime(data['Order_Date'])
 
 
 users = pd.unique(data['Customer_ID'])
-ed, rd, dd, yd = [], [], [], []
+ed, rd, dd, yd, ym, no = [], [], [], [], [], []
 
 for user in users:
     temp = data.loc[data['Customer_ID'] == user]
@@ -45,16 +54,25 @@ for user in users:
     ed.append(temp.Order_Date.min())
     rd.append(temp.Order_Date.max())
     yd.append(temp.Order_Year.max())
+    ym.append(temp.Order_Year.min())
+    no.append(len(temp))
 # users['first_order'] = ed
 # users['last_order'] = rd
+
 for i in range(len(ed)):
     dd.append(pd.to_datetime(rd[i])-pd.to_datetime(ed[i]))
+    
+
 
 user_data = pd.DataFrame(
     {'User_ID':users, 
      'First_Order':ed, 
      'Last_Order':rd, 
      'Date_Difference':dd,
-     'Year_Last_Order':yd})
+     'Year_Last_Order':yd,
+     'Year_First_Order':ym,
+     'Number_Orders':no})
 
-sb.histplot(user_data, x="Year_Last_Order")
+values_on_bars(sb.histplot(user_data, x="Year_Last_Order"))
+#values_on_bars(sb.histplot(user_data, x="Year_First_Order"))
+#values_on_bars(sb.histplot(user_data, x="Number_Orders"))
